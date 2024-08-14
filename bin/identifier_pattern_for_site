@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
+BASEDIR=$( dirname $SCRIPTDIR  )
+
+site=$1
+
+URL=`$SCRIPTDIR/get_url_for_site "$site"`
+
+curl -s "$URL/?verb=Identify" | xmllint --format - | egrep "sampleIdentifier" | sed -e 's/^.*<sampleIdentifier>//' -e 's#</sampleIdentifier>.*$##'
+

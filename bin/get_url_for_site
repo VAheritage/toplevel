@@ -1,0 +1,8 @@
+#!/bin/bash
+
+site=$1
+
+url=`cat /usr/local/projects/oai-harvest-data/config.xml | egrep provider | egrep "name=\"$site\"" | sed -e 's/^.*url="//' -e 's/".*$//' `
+
+echo $url
+

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
+BASEDIR=$( dirname $SCRIPTDIR  )
+
+site=$1
+
+URL=`$SCRIPTDIR/get_url_for_site "$site"`
+
+filename=$2
+
+identifier=`$SCRIPTDIR/identifier_from_file $site $filename`
+
+metadata_prefix=$3
+
+getrecord="$URL/?verb=GetRecord&identifier=${identifier}&metadataPrefix=${metadata_prefix}"
+
+echo $getrecord

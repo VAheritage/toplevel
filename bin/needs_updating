@@ -1,0 +1,26 @@
+#!/bin/bash
+
+SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
+BASEDIR=$( dirname $SCRIPTDIR  )
+
+site=$1
+
+filename=$2
+
+curl_url=`$SCRIPTDIR/curl_url_for_filename $site $filename oai_dc`
+
+date_item_updated=`curl -s "${curl_url}" | xmllint --format - | egrep datestamp | sed -e 's/^.*<datestamp>//' -e 's#</datestamp>.*$##'`
+
+# Convert the given date to seconds since epoch
+item_updated_epoch=$(date -d "${date_item_updated}" +%s)
+
+# Get the file's last modified date and convert it to seconds since epoch
+file_mod_date_epoch=$(stat -c %Y "$filename")
+
+# Compare the two dates
+if [ "$file_mod_date_epoch" -gt "$item_updated_epoch" ]; then
+  echo "up_to_date"
+else
+  echo "modified"
+fi
+

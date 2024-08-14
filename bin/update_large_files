@@ -1,0 +1,17 @@
+#!/bin/bash
+
+SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
+BASEDIR=$( dirname $SCRIPTDIR  )
+
+
+for file in `find  $BASEDIR/oai-harvest-data/oai/ead/ -type f -size +2M `
+do 
+    site=`echo $file | sed -e 's#.*oai-harvest-data/oai/ead/##' -e 's#/repos.*##'`
+    needs=`$SCRIPTDIR/needs_updating $site $file`
+    if [[ "$needs" == "modified" ]] ; then 
+        $SCRIPTDIR/get_oai_ead $site $file
+    else
+        echo "$site $file $needs"
+    fi
+done
+

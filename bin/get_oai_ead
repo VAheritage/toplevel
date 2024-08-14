@@ -1,0 +1,44 @@
+#!/bin/bash
+
+SCRIPTDIR=$( (cd -P $(dirname $0) && pwd) )
+BASEDIR=$( dirname $SCRIPTDIR  )
+
+site=$1
+
+filename=$2
+fname=`basename $filename`
+
+curl_url=`$SCRIPTDIR/curl_url_for_filename $site $filename oai_ead`
+
+tmp_file=${BASEDIR}/tmp/${site}/${fname}
+
+mkdir -p ${BASEDIR}/tmp/${site}
+
+echo "downloading to file $tmp_file"
+
+curl -s "$curl_url" > $tmp_file
+
+# check if file is valid
+xmllint --noout $tmp_file  2> /dev/null
+
+result=$?
+
+if [[ "$result" == "0" ]] ; then 
+   tmp_out="${tmp_file}.out"
+   echo '<?xml version="1.0" encoding="UTF-8"?>' > ${tmp_out}
+   xmllint --xpath "//*[local-name()='ead']" ${tmp_file} >> ${tmp_out} 
+   result2=$?
+   if [[ "$result2" == "0" ]]; then
+      echo "downloaded and replaced file $filename with current version"
+      mv ${tmp_out}  ${filename}
+   fi
+else
+   echo "downloaded file contains errors, touching file $filename to prevent the harvester from trying it"
+   touch $filename
+   identifier=`$SCRIPTDIR/identifier_from_file $site $filename`
+   error_filename=`echo $identifier | sed -e 's#[:/]\+#_#g'`".error"
+   error_path="$BASEDIR/oai-harvest-data/oai/error/${error_filename}"
+   echo "moving error file to error directory"
+   mv $tmp_file $error_path
+fi
+
