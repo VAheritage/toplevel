@@ -11,6 +11,10 @@ filename=$2
 
 identifier=`$SCRIPTDIR/identifier_from_file $site $filename`
 
+if [[ "$identifier" == "" ]]; then
+    exit 1
+fi
+
 metadata_prefix=$3
 
 getrecord="$URL/?verb=GetRecord&identifier=${identifier}&metadataPrefix=${metadata_prefix}"

@@ -9,6 +9,9 @@ filename=$2
 fname=`basename $filename`
 
 curl_url=`$SCRIPTDIR/curl_url_for_filename $site $filename oai_ead`
+if [[ "$curl_url" == "" ]] ; then
+    exit 1
+fi
 
 tmp_file=${BASEDIR}/tmp/${site}/${fname}
 

@@ -7,5 +7,29 @@ site=$1
 
 URL=`$SCRIPTDIR/get_url_for_site "$site"`
 
-curl -s "$URL/?verb=Identify" | xmllint --format - | egrep "sampleIdentifier" | sed -e 's/^.*<sampleIdentifier>//' -e 's#</sampleIdentifier>.*$##'
+# Redirect pipeline output to a temporary file
+temp_file=$(mktemp)
+curl -m 1 -s "$URL/?verb=Identify" | xmllint --format - 2> /dev/null |
+     egrep "sampleIdentifier" | sed -e 's/^.*<sampleIdentifier>//' -e 's#</sampleIdentifier>.*$##' > "$temp_file"
 
+# Capture individual command exit statuses
+curl_status=${PIPESTATUS[0]}
+xmllint_status=${PIPESTATUS[1]}
+
+# Now read the output from the temp file
+output=$(<"$temp_file")
+rm "$temp_file"  # Clean up temporary file
+
+# Output the result if needed
+if [[ "$output" != "" ]] ; then 
+    echo "$output"
+fi
+
+# Return different exit codes based on which command failed
+if [[ "$curl_status" != "0" ]]; then
+  exit 10   
+elif [[ "$xmllint_status" != "0" ]]; then
+  exit 20   
+else
+  exit 0    # Success
+fi

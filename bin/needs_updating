@@ -8,6 +8,9 @@ site=$1
 filename=$2
 
 curl_url=`$SCRIPTDIR/curl_url_for_filename $site $filename oai_dc`
+if [[ "$curl_url" == "" ]] ; then
+    exit 1
+fi
 
 date_item_updated=`curl -s "${curl_url}" | xmllint --format - | egrep datestamp | sed -e 's/^.*<datestamp>//' -e 's#</datestamp>.*$##'`
 

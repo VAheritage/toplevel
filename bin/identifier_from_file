@@ -8,6 +8,9 @@ site=$1
 URL=`$SCRIPTDIR/get_url_for_site "$site"`
 
 identifierpattern=`$SCRIPTDIR/identifier_pattern_for_site $site`
+if [[ "$identifierpattern" == "" ]]; then
+    exit 1
+fi
 
 filename=$2
 
